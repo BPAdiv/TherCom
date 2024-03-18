@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 const userRouter = require("./routes/userRouter");
 const forumRouter = require("./routes/forumRouter");
 const articleRouter = require("./routes/articleRouter");
+const ticketRouter = require("./routes/ticketRouter");
+const supportGroupRouter = require("./routes/supportGroupRouter");
 const app = express();
 
 // connect to db (mongodb + mongoose)
@@ -25,6 +27,8 @@ app.use(express.json());
 app.use("/api/user", userRouter);
 app.use("/api/forum", forumRouter);
 app.use("/api/article", articleRouter);
+app.use("/api/ticket", ticketRouter);
+app.use("/api/supportGroup", supportGroupRouter);
 // app.use("/api/product", productRouter);
 // app.use("/api/telegram", telegramRouter);
 

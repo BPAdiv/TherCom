@@ -23,9 +23,13 @@ const newComment = async (req, res) => {
 
     const newComment = new Comment({ content, author });
 
-    const post = await ForumPost.findByIdAndUpdate(postId, {
-      $push: { comments: newComment._id },
-    });
+    const post = await ForumPost.findByIdAndUpdate(
+      postId,
+      {
+        $push: { comments: newComment._id },
+      },
+      { new: true }
+    );
     // const post = await ForumPost.findById(postId);
     //     if (!post) return res.status(404).json({ message: "no post found" });
     //     post.comments.push(newComment._id);
@@ -50,7 +54,33 @@ const newComment = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+const deleteComment = async (req, res) => {
+  try {
+    const { commentId } = req.body;
+    const postId = req.params.postId;
 
+    const forumPost = await ForumPost.findByIdAndUpdate(
+      postId,
+      { $pull: { comments: commentId } },
+      { new: true }
+    );
+    await Comment.findByIdAndDelete(commentId);
+    // const post = await ForumPost.findById(postId);
+    //     if (!post) return res.status(404).json({ message: "no post found" });
+    //     post.comments.push(newComment._id);
+    //     const savedPost = await post.save();
+    // Check if post exists
+    if (!forumPost) {
+      return res.status(404).json({ message: "No supportGroup found" });
+    }
+
+    // Return success message with saved   supportGroup data
+    res.status(201).json({ message: "comment removed ", data: { forumPost } });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 //
 const getPosts = async (req, res) => {
   try {
@@ -168,4 +198,5 @@ module.exports = {
   toggleLikePost,
   updatePost,
   deletePostById,
+  deleteComment,
 };
