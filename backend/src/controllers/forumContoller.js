@@ -30,11 +30,7 @@ const newComment = async (req, res) => {
       },
       { new: true }
     );
-    // const post = await ForumPost.findById(postId);
-    //     if (!post) return res.status(404).json({ message: "no post found" });
-    //     post.comments.push(newComment._id);
-    //     const savedPost = await post.save();
-    // Check if post exists
+
     if (!post) {
       return res.status(404).json({ message: "No post found" });
     }
@@ -84,11 +80,30 @@ const deleteComment = async (req, res) => {
 //
 const getPosts = async (req, res) => {
   try {
-    const forumPosts = await ForumPost.find().populate("comments");
+    const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+    const limit = parseInt(req.query.limit) || 2; // Default limit to 10 posts per page
+    const sortBy = req.query.sortBy || "-createdAt"; // Sort by creation date in descending order by default
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const totalPosts = await ForumPost.countDocuments();
+
+    const forumPosts = await ForumPost.find()
+      .populate("comments")
+      .sort(sortBy)
+      .limit(limit)
+      .skip(startIndex);
+
     if (!forumPosts || forumPosts.length === 0) {
       return res.status(404).json({ message: "No posts found" });
     }
-    res.status(201).json({ message: "Posts found", data: forumPosts });
+    const pagination = {
+      currentPage: page,
+      totalPages: Math.ceil(totalPosts / limit),
+      totalPosts: totalPosts,
+    };
+    res
+      .status(201)
+      .json({ message: "Posts found", data: forumPosts, pagination });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
@@ -190,6 +205,30 @@ const deletePostById = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+const getPostCommentsById = async (req, res) => {
+  try {
+    const postId = req.params.postId;
+    const page = req.params.page || 1; // Get page number from query params or default to 1
+    const perPage = 7; // Number of comments per page
+
+    const post = await ForumPost.findById(postId).populate({
+      path: "comments",
+      options: {
+        limit: perPage,
+        skip: (page - 1) * perPage,
+      },
+    });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.status(200).json({ message: "Comments found", data: post.comments });
+  } catch (error) {
+    console.log("Error:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 module.exports = {
   newPost,
   newComment,
@@ -199,4 +238,5 @@ module.exports = {
   updatePost,
   deletePostById,
   deleteComment,
+  getPostCommentsById,
 };

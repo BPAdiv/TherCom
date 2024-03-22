@@ -9,6 +9,7 @@ const {
   toggleLikePost,
   deletePostById,
   deleteComment,
+  getPostCommentsById,
 } = require("../controllers/forumContoller");
 
 forumRouter.post("/newPost", newPost);
@@ -19,5 +20,6 @@ forumRouter.post("/updatePost", updatePost);
 forumRouter.put("/toggleLike/:postId", toggleLikePost);
 forumRouter.put("/removeComment/:postId", deleteComment);
 forumRouter.delete("/deletePost/:postId", deletePostById);
+forumRouter.get("/postComments/:postId/:page", getPostCommentsById);
 
 module.exports = forumRouter;

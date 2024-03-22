@@ -8,6 +8,7 @@ const ForumPostSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
   comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }], // Reference to comments
   likes: { type: Number, default: 0 },
+  tags: [{ type: String }],
 });
 
 module.exports = mongoose.model("ForumPost", ForumPostSchema);
